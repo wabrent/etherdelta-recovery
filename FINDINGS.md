@@ -74,11 +74,23 @@ manual disassembly of top targets.
 | 0x4d1886da | 107.5 | exchange family (same selectors as 0x4aea7cf5); time lock storage[5]=4587234 long passed; user-claimable balances |
 | 0xf058ee35 | 91.2 | withdraw() checks balances[msg.sender] > 0 (disassembly pc 888-970); user-claimable |
 | 0xc3c12a9e | 101.3 | owner 0x194AFBF7A5 (last tx 2025-01-09); queue |
-| 0xdd637dda / 0x48c128ea / 0x879ae070 / 0xdc260a23 | 138+98+84+92 | staking-template clones (slot0=3); queue |
+| 0xdd637dda / 0x48c128ea / 0x879ae070 / 0xdc260a23 | 138+98+84+92 | staking-template clones (slot0=3) |
 | 0x05aa2fdf / 0x4fb7d68e / 0x18b59a4d | 120/84/70 | "B4B" family, same creator 0x535b25b00C; queue |
 | 0x47663541 / others | 87 | queue |
 
-Pattern: ~90% of "stuck" contracts are exchange residuals (user-claimable).
+## Batch 2026-08-19 (round 2)
+
+| Address | ETH | Verdict |
+| --- | --- | --- |
+| 0x2387a684 | 55.6 | ICO refund contract (getRefund() 0xb2d5ae44): requires phase 3 (storage[0]&0xff==3), currently phase 1. Phase setter = owner 0xF17dE20488FEC8100DD294b678c6579516B2232b, dormant since 2018-06-12. INVESTOR FUNDS BLOCKED BY DORMANT OWNER - owner-locked case |
+| 0xdd637dda + staking-template clones (0x48c128ea, 0x879ae070, 0xdc260a23, 0x86afdacc, 0xff2c689c, 0xf8f6e626) | ~560 total | deposit()/withdraw/withdrawAll staking template, slot0=3; user-claimable pattern (outreach) |
+| 0xfd71d62a | 73.2 | 2016 claim() contract, 773 bytes; queue |
+
+## Owner-locked cases so far
+1. 0xc4c51de1 + 0xd79b4c67 (206 ETH, 2015) - owner 0x87c5b587, silent since 2017-05
+2. 0x2387a684 (55.6 ETH, 2017 ICO) - owner 0xF17dE20488, silent since 2018-06, refund phase never activated
+
+## Pattern: ~90% of "stuck" contracts are exchange residuals (user-claimable).
 The only owner-lost cases remain: 2015 pair 0xc4c51de1+0xd79b4c67 (206 ETH).
 
 ## Analysis queue (shortlist.csv - 369 addresses)
