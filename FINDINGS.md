@@ -64,6 +64,21 @@ manual disassembly of top targets.
   ETH burned, unrecoverable.
 - WETH9 0xc02aaa39 - 2.28M ETH: infrastructure, not a target.
 
+## Batch 2026-08-19 (batch_probe.py, 15 targets, ~1,450 ETH)
+
+| Address | ETH | Verdict |
+| --- | --- | --- |
+| 0x4db13686 / 0xc0099b50 / 0x6baec8a0 (553-byte clones) | 83.7 / 75.6 / 69.5 | kill()+collect() collection contracts; owner 0x42dA8a05CB ACTIVE (tx 2026-08-03) - not stuck |
+| 0x4d1886da | 107.5 | exchange family (same selectors as 0x4aea7cf5); time lock storage[5]=4587234 long passed; user-claimable balances |
+| 0xf058ee35 | 91.2 | withdraw() checks balances[msg.sender] > 0 (disassembly pc 888-970); user-claimable |
+| 0xc3c12a9e | 101.3 | owner 0x194AFBF7A5 (last tx 2025-01-09); queue |
+| 0xdd637dda / 0x48c128ea / 0x879ae070 / 0xdc260a23 | 138+98+84+92 | staking-template clones (slot0=3); queue |
+| 0x05aa2fdf / 0x4fb7d68e / 0x18b59a4d | 120/84/70 | "B4B" family, same creator 0x535b25b00C; queue |
+| 0x47663541 / others | 87 | queue |
+
+Pattern: ~90% of "stuck" contracts are exchange residuals (user-claimable).
+The only owner-lost cases remain: 2015 pair 0xc4c51de1+0xd79b4c67 (206 ETH).
+
 ## Analysis queue (shortlist.csv - 369 addresses)
 - 0xab83d96d - 468 ETH (2018, "Gold Apple", withdraw)
 - 0xfd71d62a - 73 ETH (2016, claim())
