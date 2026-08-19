@@ -32,8 +32,10 @@ manual disassembly of top targets.
 - storage[1] = 0x87C5B5874A18B4306DF8a752a6C8cc3E82daFc19 = deployer = EOA.
 - Owner: no labels, 0.001 ETH balance, last tx 2017-05-06. In 2016 moved
   large amounts (3,058 ETH on 2016-07-04).
-- Trail: received 100 ETH from 0x326be8f7 on 2015-08-12, deployed 3 contracts
-  the same day (incl. 0xc4c51de1, 0xd79b4c67). Holds 1 WEALTH token (spam).
+- Trail: received 100 ETH from 0x326be8f71bfb0379f989aab1cc1fe37f0a771f60 on
+  2015-08-12 (full address confirmed), deployed 4 contracts the same day
+  (incl. 0xc4c51de1, 0xd79b4c67, 0xb86a36e3 - empty token, 0 ETH).
+  Holds 1 WEALTH token (spam).
 - Path: try to identify the owner from on-chain traces, white contact,
   agreed fee for outreach/analysis.
 
