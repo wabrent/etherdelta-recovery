@@ -1,8 +1,8 @@
-"""Генератор 4-байтовых селекторов (sighash) для функций вывода средств.
+"""Generator of 4-byte selectors (sighash) for fund withdrawal functions.
 
-Запуск:
-    python sighash.py            -> записывает selectors.txt + выводит SQL-фрагмент
-    python sighash.py "foo()"    -> выводит селектор для одной сигнатуры
+Run:
+    python sighash.py            -> writes selectors.txt + prints an SQL snippet
+    python sighash.py "foo()"    -> prints the selector for a single signature
 """
 
 import sys
@@ -69,10 +69,10 @@ def main() -> None:
     with open("selectors.txt", "w", encoding="utf-8") as f:
         for sel, sig in pairs:
             f.write(f"{sel}  {sig}\n")
-    print(f"selectors.txt: {len(pairs)} селекторов")
+    print(f"selectors.txt: {len(pairs)} selectors")
 
     sql_list = ",\n    ".join(f"'{sel}'" for sel, _ in pairs)
-    print("\nSQL-фрагмент для BigQuery (IN-список):\n")
+    print("\nSQL snippet for BigQuery (IN-list):\n")
     print(sql_list)
 
 

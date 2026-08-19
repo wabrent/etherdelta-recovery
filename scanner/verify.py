@@ -1,13 +1,13 @@
-"""Проверка контракта-кандидата через публичный RPC (без своего нода).
+"""Verify a candidate contract via public RPC (no own node).
 
-Запуск:
+Run:
     python verify.py 0x9fa8fa61a10ff892e4ebceb7f4e0fc684c2ce0a9
     python verify.py <address> --rpc <rpc_url>
 
-Что делает:
-    1) баланс и размер кода (если кода нет — контракт self-destructed, пропуск);
-    2) вытаскивает все PUSH4-селекторы из runtime-байткода;
-    3) сверяет со списком известных "выводящих" функций (selectors.txt).
+What it does:
+    1) balance and code size (if no code — contract is self-destructed, skip);
+    2) extracts all PUSH4 selectors from the runtime bytecode;
+    3) matches against the list of known "withdrawing" functions (selectors.txt).
 """
 
 import argparse
@@ -33,7 +33,7 @@ def load_names() -> dict:
 
 
 def extract_sighashes(code: bytes) -> list:
-    """Ищет последовательности 0x63 <4 байта> (PUSH4) в байткоде."""
+    """Find 0x63 <4 bytes> (PUSH4) sequences in bytecode."""
     found = set()
     i = 0
     while i < len(code) - 4:
@@ -53,15 +53,15 @@ def main() -> None:
 
     w3 = Web3(Web3.HTTPProvider(args.rpc))
     if not w3.is_connected():
-        sys.exit("RPC недоступен. Попробуй другой: https://eth.llamarpc.com")
+        sys.exit("RPC unavailable. Try another: https://eth.llamarpc.com")
 
     addr = w3.to_checksum_address(args.address)
     balance = w3.eth.get_balance(addr)
     code = w3.eth.get_code(addr)
 
-    print(f"Адрес:   {addr}")
-    print(f"Баланс:  {w3.from_wei(balance, 'ether')} ETH")
-    print(f"Код:     {len(code)} байт" + ("" if len(code) else "  <- КОДА НЕТ (self-destructed), пропуск"))
+    print(f"Address: {addr}")
+    print(f"Balance: {w3.from_wei(balance, 'ether')} ETH")
+    print(f"Code:    {len(code)} bytes" + ("" if len(code) else "  <- NO CODE (self-destructed), skip"))
 
     if not len(code):
         return
@@ -69,14 +69,14 @@ def main() -> None:
     names = load_names()
     known = [(s, names[s]) for s in extract_sighashes(code) if s in names]
     if known:
-        print(f"\nИзвестные функции вывода ({len(known)}):")
+        print(f"\nKnown withdrawal functions ({len(known)}):")
         for sel, name in known:
             print(f"  {sel}  {name}")
-        print("\nСледующий шаг: открыть контракт на etherscan.io, прочитать эти функции,")
-        print("понять кто может их вызвать (msg.sender / onlyOwner / multisig).")
+        print("\nNext step: open the contract on etherscan.io, read these functions,")
+        print("and figure out who can call them (msg.sender / onlyOwner / multisig).")
     else:
-        print("\nИзвестных селекторов вывода не найдено — вероятно, вывод через")
-        print("нестандартную функцию. Смотреть исходник/декомпиляцию вручную.")
+        print("\nNo known withdrawal selectors found — funds are probably withdrawn via")
+        print("a non-standard function. Inspect the source/decompilation manually.")
 
 
 if __name__ == "__main__":

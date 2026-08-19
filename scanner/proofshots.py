@@ -1,9 +1,9 @@
-"""Скриншоты-пруфы для твит-треда.
+"""Screenshot proofs for the tweet thread.
 
-Снимает страницы Blockscout (баланс, имя, создатель), таблицы кандидатов
-и дамп дизассемблера. Результат: screenshots/tweet*.png
+Captures Blockscout pages (balance, name, creator), candidate tables
+and the disassembler dump. Result: screenshots/tweet*.png
 
-Запуск: python proofshots.py
+Run: python proofshots.py
 """
 
 import csv

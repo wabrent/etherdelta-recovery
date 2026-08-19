@@ -1,23 +1,23 @@
 -- ============================================================
--- Сканер зависших контрактов v1 (BigQuery public dataset)
--- Запуск: https://console.cloud.google.com/bigquery (нужен Google-аккаунт,
--- бесплатный тир 1 ТБ обработанных данных в месяц — этого хватает).
--- Стоимость этого запроса: ~200-400 ГБ (показывается в консоли до запуска).
+-- Stuck contracts scanner v1 (BigQuery public dataset)
+-- Run: https://console.cloud.google.com/bigquery (needs a Google account,
+-- free tier 1 TB of processed data per month — that is enough).
+-- Cost of this query: ~200-400 GB (shown in the console before running).
 --
--- Логика:
---   1) берём все контракты, развёрнутые до 2020 года, у которых в байткоде
---      есть хотя бы один "выводящий" селектор (refund/claim/withdraw/...);
---   2) джойним баланс из crypto_ethereum.balances (обновляется ежедневно);
---   3) отсекаем контракты, с которых что-то отправляли в последние 12 мес;
---   4) считаем fingerprint кода для дедупликации (одинаковый код = один аудит).
+-- Logic:
+--   1) take all contracts deployed before 2020 whose bytecode
+--      contains at least one "withdrawal" selector (refund/claim/withdraw/...);
+--   2) join the balance from crypto_ethereum.balances (updated daily);
+--   3) drop contracts that sent anything out in the last 12 months;
+--   4) compute a code fingerprint for deduplication (identical code = one audit).
 --
--- Экспорт результата: кнопка SAVE RESULTS -> CSV -> файл results.csv
--- Дальше: python scanner/rank.py results.csv
+-- Export the result: SAVE RESULTS button -> CSV -> file results.csv
+-- Next: python scanner/rank.py results.csv
 -- ============================================================
 
-DECLARE min_eth FLOAT64 DEFAULT 0.25;   -- минимум ETH на контракте
-DECLARE max_deploy TIMESTAMP DEFAULT TIMESTAMP('2020-01-01');  -- старее этого года
-DECLARE dormant_months INT64 DEFAULT 12;  -- без исходящих транзакций N месяцев
+DECLARE min_eth FLOAT64 DEFAULT 0.25;   -- minimum ETH on the contract
+DECLARE max_deploy TIMESTAMP DEFAULT TIMESTAMP('2020-01-01');  -- older than this year
+DECLARE dormant_months INT64 DEFAULT 12;  -- no outgoing transactions for N months
 
 WITH recent_outgoing AS (
   SELECT from_address, MAX(block_timestamp) AS last_out
@@ -55,6 +55,6 @@ WHERE c.block_timestamp < TIMESTAMP('2020-01-01')
       '0xe5225381','0x8433acd1','0x7362377b','0xe086e5ec'
     )
   )
-  AND r.from_address IS NULL              -- не было исходящих tx за 12 мес
+  AND r.from_address IS NULL              -- no outgoing tx for 12 months
 ORDER BY b.eth_balance DESC
 LIMIT 500;

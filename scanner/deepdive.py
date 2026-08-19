@@ -1,6 +1,6 @@
-"""Глубокая разведка конкретного адреса через Blockscout API.
+"""Deep reconnaissance of a specific address via Blockscout API.
 
-Запуск:
+Run:
     python deepdive.py 0xdd9fd6b6f8f7ea932997992bbe67eabb3e316f3c
 """
 
@@ -40,7 +40,7 @@ def main() -> None:
 
     try:
         txs = api(f"addresses/{addr}/transactions?limit=5")
-        print("\nПоследние 5 транзакций:")
+        print("\nLast 5 transactions:")
         for t in txs.get("items", []):
             ts = t.get("timestamp")
             frm = (t.get("from") or {}).get("hash", "?")[:12]
@@ -53,7 +53,7 @@ def main() -> None:
 
     try:
         tr = api(f"addresses/{addr}/internal-transactions?limit=5")
-        print("\nПоследние 5 внутренних транзакций:")
+        print("\nLast 5 internal transactions:")
         for t in tr.get("items", []):
             ts = t.get("timestamp")
             frm = (t.get("from") or {}).get("hash", "?")[:12]
@@ -66,7 +66,7 @@ def main() -> None:
     try:
         sc = api(f"smart-contracts/{addr}")
         abi = sc.get("abi")
-        print(f"\nABI: {'есть' if abi else 'нет'}, сол. версия: {sc.get('compiler_version')}")
+        print(f"\nABI: {'yes' if abi else 'no'}, solc version: {sc.get('compiler_version')}")
         if abi:
             for f in abi:
                 if f.get("type") == "function":

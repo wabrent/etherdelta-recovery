@@ -1,7 +1,7 @@
-"""Ончейн-зонд: вызывает известные getter'ы контракта через публичный RPC.
+"""On-chain probe: calls known getters of a contract via public RPC.
 
-Запуск:
-    python probe.py 0xdd9fd6b6f8f7ea932997992bbe67eabb3e316f3c [адрес2 ...]
+Run:
+    python probe.py 0xdd9fd6b6f8f7ea932997992bbe67eabb3e316f3c [addr2 ...]
 """
 
 import sys

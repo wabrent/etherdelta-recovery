@@ -1,11 +1,11 @@
 -- ============================================================
--- Дедупликация по коду: одинаковый байткод = один аудит.
--- Запускается ПОСЛЕ stuck_contracts.sql. Результат первого запроса
--- сохрани как таблицу (Save Results -> BigQuery table -> dataset: my_results,
--- table: candidates) и подставь её имя ниже.
+-- Deduplication by code: identical bytecode = one audit.
+-- Runs AFTER stuck_contracts.sql. Save the result of the first query
+-- as a table (Save Results -> BigQuery table -> dataset: my_results,
+-- table: candidates) and substitute its name below.
 --
--- Это экономит часы: если 200 контрактов — это 3 кластера одинакового кода,
--- аудировать нужно 3 раза, а не 200.
+-- This saves hours: if 200 contracts are 3 clusters of identical code,
+-- you need to audit 3 times, not 200.
 -- ============================================================
 
 SELECT

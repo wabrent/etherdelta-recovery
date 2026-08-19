@@ -1,14 +1,14 @@
-"""Батч-скан балансов контрактов через публичные RPC (без ключей).
+"""Batch-scan contract balances via public RPCs (no keys).
 
-Источники адресов:
-    --source coingecko        скачать список токенов Ethereum с api.coingecko.com
-    --source file:addr.txt    свой список адресов (по одному в строке)
+Address sources:
+    --source coingecko        download the list of Ethereum tokens from api.coingecko.com
+    --source file:addr.txt    your own address list (one per line)
 
-Запуск:
+Run:
     python scan_batch.py --source coingecko --min-eth 0.25
     python scan_batch.py --source file:list.txt --min-eth 1
 
-Результат: results.csv + кэш в cache.json (повторный запуск продолжает с места).
+Result: results.csv + cache in cache.json (re-running resumes from where it left off).
 """
 
 import argparse
@@ -120,7 +120,7 @@ class Scanner:
                 done += 1
                 if done % 200 == 0:
                     self.save_cache()
-                    print(f"  проверено {done}/{len(addresses)}", flush=True)
+                    print(f"  checked {done}/{len(addresses)}", flush=True)
                 res = fut.result()
                 if res is None:
                     continue
@@ -142,7 +142,7 @@ def main() -> None:
         path = Path(args.source.split(":", 1)[1])
         addresses = [l.strip() for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
     else:
-        print("Скачиваю список токенов с coingecko...", flush=True)
+        print("Downloading the token list from coingecko...", flush=True)
         import urllib.request
 
         req = urllib.request.Request(
@@ -156,10 +156,10 @@ def main() -> None:
             for c in coins
             if c.get("platforms", {}).get("ethereum")
         ]
-        print(f"Токен-контрактов на Ethereum: {len(addresses)}", flush=True)
+        print(f"Ethereum token contracts: {len(addresses)}", flush=True)
 
     addresses = list(dict.fromkeys(a.lower() for a in addresses))
-    print(f"Запускаю проверку {len(addresses)} адресов, порог {args.min_eth} ETH", flush=True)
+    print(f"Checking {len(addresses)} addresses, threshold {args.min_eth} ETH", flush=True)
 
     scanner = Scanner(args.min_eth)
     hits = scanner.run(addresses, args.workers)
@@ -178,11 +178,11 @@ def main() -> None:
         for addr, eth, n, known in rows:
             w.writerow([addr, f"{eth:.4f}", n, ";".join(known)])
 
-    print(f"\n=== НАХОДКИ (ETH > {args.min_eth}, контракт жив) === {len(rows)}")
+    print(f"\n=== HITS (ETH > {args.min_eth}, contract alive) === {len(rows)}")
     for addr, eth, n, known in rows[:30]:
         flags = " ".join(sel_names[s] for s in known[:4])
         print(f"{addr}  {eth:9.2f} ETH  [{n}] {flags}")
-    print(f"\nСохранено: {OUT_FILE}")
+    print(f"\nSaved: {OUT_FILE}")
 
 
 if __name__ == "__main__":

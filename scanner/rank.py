@@ -1,16 +1,16 @@
-"""Ранжирование CSV-выгрузки из BigQuery (stuck_contracts.sql).
+"""Rank a CSV export from BigQuery (stuck_contracts.sql).
 
-Запуск:
+Run:
     python rank.py results.csv [--top 50]
 
-Формат CSV (колонки из SQL):
+CSV format (columns from SQL):
     address, eth_balance, eth, deployed_at, creator_address, code_fp, sighashes, last_out
 
-Оценка интереса:
-    score = eth * возрастной_множитель * селекторный_множитель
-    - возраст: чем старше контракт, тем выше (до x3 на 8+ лет)
-    - селекторы: refund/claim/withdraw = 0.5, прочие из списка = 0.25
-    - спящий контракт (нет last_out) получает флаг DORMANT
+Interest score:
+    score = eth * age_multiplier * selector_multiplier
+    - age: the older the contract, the higher (up to x3 at 8+ years)
+    - selectors: refund/claim/withdraw = 0.5, others from the list = 0.25
+    - a dormant contract (no last_out) gets the DORMANT flag
 """
 
 import argparse
@@ -21,7 +21,7 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 
-# имя -> вес, берём из scanner/selectors.txt
+# name -> weight, loaded from scanner/selectors.txt
 SELECTOR_WEIGHTS = {}
 HIGH = {"refund", "claim", "withdraw", "unlock", "release"}
 
@@ -35,7 +35,7 @@ def load_selectors() -> None:
                 name = sig.split("(")[0].lower()
                 SELECTOR_WEIGHTS[sel] = 0.5 if any(h in name for h in HIGH) else 0.25
     except FileNotFoundError:
-        print("selectors.txt не найден — селекторный множитель выключен", file=sys.stderr)
+        print("selectors.txt not found — selector multiplier disabled", file=sys.stderr)
 
 
 def parse_ts(value: str):
@@ -101,8 +101,8 @@ def main() -> None:
             f"{r['code_fp']:<18} {flags}"
         )
     print("-" * 100)
-    print("Проверка лидера: python verify.py <address>")
-    print("Ссылки: https://etherscan.io/address/<address>")
+    print("Check the leader: python verify.py <address>")
+    print("Links: https://etherscan.io/address/<address>")
 
 
 if __name__ == "__main__":

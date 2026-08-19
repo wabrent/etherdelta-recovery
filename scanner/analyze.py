@@ -1,6 +1,6 @@
-"""Дизассемблер контракта: таблица функций + код функции по селектору.
+"""Contract disassembler: function table + function code by selector.
 
-Запуск:
+Run:
     python analyze.py 0x4aea7cf559f67cedcad07e12ae6bc00f07e8cf65
     python analyze.py <addr> withdraw 0x2e1a7d4d
 """
@@ -39,11 +39,11 @@ def main() -> None:
             dst = ops[nxt].operand if nxt is not None else 0
             dispatchers.append((sel, dst, i))
     if dispatchers:
-        print("\nДиспетчер функций:")
+        print("\nFunction dispatcher:")
         for sel, dst, i in dispatchers:
             print(f"  {sel}  -> {dst}")
     else:
-        print("\nPUSH4+EQ-диспетчер не найден (возможно, if-else через CALLDATASIZE)")
+        print("\nPUSH4+EQ dispatcher not found (possibly if-else via CALLDATASIZE)")
 
     if len(sys.argv) > 2:
         sel = sys.argv[2].lower()
@@ -52,12 +52,12 @@ def main() -> None:
         target = next((d for d in dispatchers if d[0] == sel), None)
         if target:
             dst = target[1]
-            print(f"\n--- Код {sel} (начиная с pc={dst}) ---")
+            print(f"\n--- Code {sel} (starting at pc={dst}) ---")
             for op in ops:
                 if op.pc >= dst:
                     print(f"  {op.pc:6d}  {op.name} {'' if op.operand is None else op.operand}")
 
-    print("\nПолный дамп сохранён? нет. Функции по селекторам смотри выше.")
+    print("\nFull dump saved? no. See function code by selector above.")
 
 
 if __name__ == "__main__":

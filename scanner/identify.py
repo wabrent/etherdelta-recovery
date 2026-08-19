@@ -1,6 +1,6 @@
-"""Идентификация кандидатов из results.csv через Blockscout API (без ключа).
+"""Identify candidates from results.csv via Blockscout API (no key).
 
-Запуск:
+Run:
     python identify.py [--top 40] [--csv scanner/results.csv]
 """
 
@@ -73,7 +73,7 @@ def main() -> None:
             w = csv.DictWriter(f, fieldnames=list(out[0].keys()))
             w.writeheader()
             w.writerows(out)
-        print(f"Сохранено: {args.out} ({len(out)} записей)")
+        print(f"Saved: {args.out} ({len(out)} records)")
 
     print(f"{'ADDRESS':<44} {'ETH':>10} {'NAME':<26} VERIFIED")
     print("-" * 90)

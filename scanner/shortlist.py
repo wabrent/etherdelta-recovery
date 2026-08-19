@@ -1,11 +1,11 @@
-"""Шорт-лист целей: неопознанные контракты с выводящими селекторами.
+"""Shortlist of targets: unidentified contracts with withdrawal selectors.
 
-Читает identified.csv (Blockscout) + results.csv (BigQuery) и оставляет
-только контракты без названия/верификации, у которых в байткоде есть
-refund/claim/withdraw/unlock/release. Это кандидаты, где деньги могут
-быть доступны владельцу/держателям.
+Reads identified.csv (Blockscout) + results.csv (BigQuery) and keeps
+only contracts without a name/verification whose bytecode contains
+refund/claim/withdraw/unlock/release. These are candidates where funds may
+be accessible to the owner/holders.
 
-Запуск: python shortlist.py [--top 40]
+Run: python shortlist.py [--top 40]
 """
 
 import argparse
@@ -59,7 +59,7 @@ def main() -> None:
         w.writeheader()
         w.writerows(out)
 
-    print(f"Сохранено: {args.out} ({len(out)} записей)\n")
+    print(f"Saved: {args.out} ({len(out)} records)\n")
     print(f"{'ADDRESS':<44} {'ETH':>10} {'DEPLOYED':<20} HIGH-SELECTORS")
     print("-" * 110)
     for r in out[: args.top]:

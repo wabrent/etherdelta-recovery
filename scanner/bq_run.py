@@ -1,16 +1,16 @@
-"""Запуск BigQuery-запросов с локальными учётными данными Google.
+"""Run BigQuery queries with local Google credentials.
 
-Требуется (один раз, 3 минуты, без карты):
-    1. Установить Google Cloud CLI:  https://cloud.google.com/sdk/docs/install
-       (winget install Google.CloudSDK  или  инсталлятор с сайта)
-    2. Войти:  gcloud auth application-default login   (откроется браузер)
-    3. Создать проект (бесплатно):  gcloud projects create <любое-имя>
+Required (once, 3 minutes, no credit card):
+    1. Install Google Cloud CLI:  https://cloud.google.com/sdk/docs/install
+       (winget install Google.CloudSDK  or  the installer from the site)
+    2. Log in:  gcloud auth application-default login   (opens a browser)
+    3. Create a project (free):  gcloud projects create <any-name>
 
-Запуск:
+Run:
     python bq_run.py
     python bq_run.py --query queries/cluster.sql
 
-Результат: scanner/results.csv (кандидаты) или stdout для cluster.sql.
+Result: scanner/results.csv (candidates) or stdout for cluster.sql.
 """
 
 import argparse
@@ -36,8 +36,8 @@ def main() -> None:
     client = bigquery.Client(project=args.project) if args.project else bigquery.Client()
     sql = Path(args.query).read_text(encoding="utf-8")
 
-    print(f"Запуск запроса: {args.query}", flush=True)
-    print("Это займёт 30–120 сек и ~200–400 ГБ из бесплатного тира 1 ТБ/мес.\n", flush=True)
+    print(f"Running query: {args.query}", flush=True)
+    print("This will take 30–120 sec and ~200–400 GB from the free 1 TB/month tier.\n", flush=True)
 
     job = client.query(sql)
     rows = job.result()
@@ -51,8 +51,8 @@ def main() -> None:
             for r in rows:
                 w.writerow([r[f] for f in schema])
                 n += 1
-        print(f"Готово: {n} строк -> {args.out}")
-        print("Дальше: python rank.py results.csv")
+        print(f"Done: {n} rows -> {args.out}")
+        print("Next: python rank.py results.csv")
     else:
         for r in rows:
             print(dict(r))
