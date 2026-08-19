@@ -1,91 +1,83 @@
-# Кейс-отчёт: 19.08.2026 — сканирование зависших ETH
+# Case notes: 2026-08-19 scan for stuck ETH
 
-Пайплайн: BigQuery (500 кандидатов) → опознание (Blockscout) → шорт-лист
-(369 неопознанных с функциями вывода) → дизассемблирование топ-целей.
+Pipeline: BigQuery (500 candidates) -> identification (Blockscout) ->
+shortlist (369 unidentified contracts with withdrawal functions) ->
+manual disassembly of top targets.
 
-## Верифицированные находки
+## Verified findings
 
-### 1. EtherDelta — 0x8d12a197cb00d4747a1fe03395095ce2a5cc6819 — 15 214 ETH
-- Биржа 2017 (Zachary Coburn), DEX-контракт с deposit/withdraw.
-- Деньги = депозиты пользователей, которые не вывели.
-- Вывод: `withdraw(uint256)` доступен держателям балансов (второй экземпляр
-  контракта: 0x373c55c277b866a69dc047cad488154ab9759466 — 122 ETH).
-- ВАЖНО (проверено 19.08.2026): контракт НЕ дремлет. Каждый день идут вызовы
-  withdraw() с разных адресов (dust-боты, суммы 0.008-0.1 ETH, receipt=1).
-  Крупные остатки никто не забирает. Точная формулировка кейса:
-  «15 214 ETH остатков в живом контракте, пыль забирают боты».
-- ОШИБКА МЕТОДИКИ: BigQuery-фильтр «не тронут 12 мес» (`from_address = контракт`)
-  всегда пуст — контракты не бывают отправителями tx. Флаг DORMANT в rank.py
-  бессмысленен. Реальная активность проверяется по вызовам НА контракт
-  (txlist, selector, receipt) и по изменению баланса.
+### 1. EtherDelta - 0x8d12a197cb00d4747a1fe03395095ce2a5cc6819 - 15,214 ETH
+- 2017 exchange (Zachary Coburn), deposit/withdraw DEX contract.
+- The funds are user deposits that were never withdrawn.
+- Withdrawal: `withdraw(uint256)` is available to any balance holder
+  (second instance: 0x373c55c277b866a69dc047cad488154ab9759466 - 122 ETH).
+- IMPORTANT (verified 2026-08-19): the contract is NOT dormant. Every day
+  `withdraw()` calls arrive from various addresses (dust bots, 0.008-0.1 ETH,
+  receipt=1). Large balances remain unclaimed. Accurate framing:
+  "15,214 ETH of residuals in a live contract; dust is being collected by bots".
+- METHODOLOGY BUG: the BigQuery dormancy filter (`from_address = contract`)
+  is always empty because contracts never appear as transaction originators.
+  The DORMANT flag in rank.py was meaningless. Real activity must be checked
+  by calls TO the contract (txlist, selector, receipt) and balance changes.
 
-### 2. 0xecf8f87f810ecf450940c9f60066b4a7a501d6a7 — 1 513 ETH (06.2016)
-- Токенизированный обменник 2016: totalSupply == баланс контракта ровно 1:1.
-- 1 471 держатель токенов, 27 268 трансферов. Держатель токена может вывести
-  ETH через withdraw(uint256).
-- Путь: идентификация крупных держателей → аутрич/гайд.
+### 2. 0xecf8f87f810ecf450940c9f60066b4a7a501d6a7 - 1,513 ETH (06.2016)
+- Tokenized exchange from 2016: totalSupply == contract balance exactly 1:1.
+- 1,471 token holders, 27,268 transfers. Any token holder can withdraw ETH
+  via withdraw(uint256).
+- Path: identify large holders, outreach/guide.
 
-### 3. 0xc4c51de1abf5d60dbd329ec0f999fd8f021ae9fc + 0xd79b4c6791784184e2755b2fc1659eaab0f80456 — 206 ETH (08.2015!)
-- Контракты первых недель Ethereum (август 2015).
-- Дизассемблер: `withdraw(uint256)` требует `msg.sender == storage[1]`.
-- storage[1] = 0x87C5B5874A18B4306DF8a752a6C8cc3E82daFc19 = создатель = EOA.
-- Владелец: без меток, 0.001 ETH на балансе, последняя tx — 06.05.2017.
-  В 2016 двигал крупные суммы (3 058 ETH одним переводом 04.07.2016).
-- Путь: попытаться идентифицировать владельца по ончейн-следам (старые
-  транзакции, токены) → белый контакт → комиссия за аутрич/разбор.
+### 3. 0xc4c51de1abf5d60dbd329ec0f999fd8f021ae9fc + 0xd79b4c6791784184e2755b2fc1659eaab0f80456 - 206 ETH (08.2015!)
+- Contracts from the first weeks of Ethereum (August 2015).
+- Disassembly: `withdraw(uint256)` requires `msg.sender == storage[1]`.
+- storage[1] = 0x87C5B5874A18B4306DF8a752a6C8cc3E82daFc19 = deployer = EOA.
+- Owner: no labels, 0.001 ETH balance, last tx 2017-05-06. In 2016 moved
+  large amounts (3,058 ETH on 2016-07-04).
+- Trail: received 100 ETH from 0x326be8f7 on 2015-08-12, deployed 3 contracts
+  the same day (incl. 0xc4c51de1, 0xd79b4c67). Holds 1 WEALTH token (spam).
+- Path: try to identify the owner from on-chain traces, white contact,
+  agreed fee for outreach/analysis.
 
-### 4. 0x4aea7cf559f67cedcad07e12ae6bc00f07e8cf65 — 221 ETH (08.2016)
-- Биржевой контракт: withdraw по `balances[msg.sender]` (дизассемблер).
-- Деньги вкладчиков → кейс-аутрич, как EtherDelta.
+### 4. 0x4aea7cf559f67cedcad07e12ae6bc00f07e8cf65 - 221 ETH (08.2016)
+- Exchange contract: withdraw by `balances[msg.sender]` (disassembly).
+- Funds belong to depositors -> outreach case like EtherDelta.
 
-### 5. 0xed44f3c2081480b08643fe1ca281fab9ed643735 — 50 ETH (12.2015)
-- Слот 1 = 0x25980600 (не адрес) — структура отличается, требует отдельного
-  разбора. Кандидат в очередь.
+### 5. 0xed44f3c2081480b08643fe1ca281fab9ed643735 - 50 ETH (12.2015)
+- Slot 1 = 0x25980600 (not an address) - different structure, needs separate
+  analysis. Queue candidate.
 
-### 6. 0xdd9fd6b6f8f7ea932997992bbe67eabb3e316f3c — 3 391 ETH (08.2018)
-- «Last Winner» (LW): владелец = деплойер 0xEAe69cADEB04E66767bD69f52e0fFFc28E37d799.
-- Владелец живой (владеет ключами) → не «потерянные деньги», только
-  коммерческий контакт (вряд ли).
+### 6. 0xdd9fd6b6f8f7ea932997992bbe67eabb3e316f3c - 3,391 ETH (08.2018)
+- "Last Winner" (LW): owner = deployer 0xEAe69cADEB04E66767bD69f52e0fFFc28E37d799.
+- Owner is alive (holds keys) -> not "lost funds", only a commercial contact
+  (unlikely).
 
-### 7. Не-цели (исключены)
-- WithdrawDAO 0xbf4ed7b2 — 81 504 ETH: вывод только за DAO-токены, остаток
-  trustee'у (A. van de Sande). Известный механизм.
-- 0x755cdba6 — 977 ETH: клон WithdrawDAO, тот же trustee.
-- 0x2cc2720e (49 ETH), 0xf0a92466 (37 ETH): self-destructed, код стёрт —
-  ETH сожжены, восстановлению не подлежат.
-- WETH9 0xc02aaa39 — 2.28M ETH: инфраструктура, не цель.
+### 7. 0x4d55f76ce2dbbae7b48661bef9bd144ce0c9091b - 2,480 ETH (09.2017)
+- Same exchange pattern as 0x4aea7cf5: deposit/withdraw by balances[msg.sender].
+- Slots 0-1 = deployer 0x4499514831219df01cf5d6b66c76ca9d76ac4f74.
+- Owner: last tx 2021-11-22 (small amounts), before that 2019-2020.
+  Contract untouched ~5 years. Classification: depositor funds (outreach case).
 
-## Очередь анализа (шорт-лист, шортлист.csv — 369 адресов)
-- 0x4d55f76c — 2 480 ETH (2017, биржевой паттерн deposit/withdraw)
-- 0xab83d96d — 468 ETH (2018, «Gold Apple», withdraw)
-- 0xfd71d62a — 73 ETH (2016, claim())
-- 0x2387a684 — 55 ETH (2017, getRefund())
-- 0x2cc2720e — 49 ETH (2017, withdrawEther)
-- 0x102011cb — 32 ETH (2017, release)
-- + 360 адресов по убыванию баланса
+### 8. Not targets (excluded)
+- WithdrawDAO 0xbf4ed7b2 - 81,504 ETH: withdrawal only for DAO token holders,
+  residual goes to trustee (A. van de Sande). Known mechanism.
+- 0x755cdba6 - 977 ETH: WithdrawDAO clone, same trustee.
+- 0x2cc2720e (49 ETH), 0xf0a92466 (37 ETH): self-destructed, code erased,
+  ETH burned, unrecoverable.
+- WETH9 0xc02aaa39 - 2.28M ETH: infrastructure, not a target.
 
-## Инструменты (scanner/)
-bq_run.py (BigQuery) · rank.py (ранжирование) · identify.py (опознание) ·
-deepdive.py (активность) · probe.py (ончейн-геттеры) · analyze.py (дизассемблер) ·
-shortlist.py (шорт-лист) · scan_batch.py (RPC-скан) · verify.py (проверка) ·
-proofshots.py (скриншоты-пруфы)
+## Analysis queue (shortlist.csv - 369 addresses)
+- 0xab83d96d - 468 ETH (2018, "Gold Apple", withdraw)
+- 0xfd71d62a - 73 ETH (2016, claim())
+- 0x2387a684 - 55 ETH (2017, getRefund())
+- 0x102011cb - 32 ETH (2017, release)
+- + 360 addresses in descending balance order
 
-## Артефакты
-- CLAIM-ETHERDELTA.md — гайд по возврату средств для EtherDelta (15 214 ETH)
-- FINDINGS.md — этот отчёт
-- scanner/results.csv · identified.csv · shortlist.csv (369 целей)
-- scanner/screenshots/ — пруф-скриншоты контрактов
+## Tooling (scanner/)
+bq_run.py (BigQuery) | rank.py (ranking) | identify.py (identification) |
+deepdive.py (activity) | probe.py (on-chain getters) | analyze.py (disassembler) |
+shortlist.py (shortlist) | scan_batch.py (RPC scan) | verify.py (verification) |
+proofshots.py (proof screenshots)
 
-## Обновление: 0x4d55f76c — 2 480 ETH (09.2017)
-- Тот же биржевой паттерн, что 0x4aea7cf5: deposit/withdraw по balances[msg.sender].
-- Слоты 0-1 = создатель 0x4499514831219df01cf5d6b66c76ca9d76ac4f74.
-- Владелец: последняя tx 22.11.2021 (мелкие суммы), до этого 2019-2020.
-  Не трогает контракт ~5 лет. Классификация: деньги вкладчиков (кейс-аутрич).
-- След владельца 206 ETH (0x87c5b587): получил 100 ETH от 0x326be8f7
-  12.08.2015 и в тот же день развернул 3 контракта (в т.ч. 0xc4c51de1,
-  0xd79b4c67). Холдит 1 WEALTH (мусорный токен).
-
-## Этика
-Ни один контракт не даёт «наших» денег: везде средства принадлежат
-владельцам/вкладчикам. Заработок — комиссия за согласованный whitehat-аутрич
-или репутация. Прямой вывод чужих средств = кража.
+## Ethics
+No contract gives "our" money: funds belong to owners/depositors. Income comes
+from an agreed whitehat outreach fee or reputation. Draining other people's
+funds is theft.
