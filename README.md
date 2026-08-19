@@ -44,6 +44,25 @@ case notes in [`FINDINGS.md`](FINDINGS.md).
 | [`FINDINGS.md`](FINDINGS.md) | Case notes: analyzed contracts, disassembly results, methodology errors and fixes |
 | [`scanner/`](scanner/) | Tooling: BigQuery queries, ranker, identifier, disassembler, screenshots |
 
+## Proof
+
+EtherDelta contract page (balance ~15,214 ETH):
+
+![EtherDelta balance](scanner/screenshots/tweet3_etherdelta_15214eth.png)
+
+Scanner: 500 candidates from one BigQuery query:
+
+![Scanner candidates](scanner/screenshots/tweet2_scanner_500_candidates.png)
+
+The 2015 contract and its sleeping owner:
+
+![2015 contract](scanner/screenshots/tweet5_contract_2015_122eth.png)
+![Sleeping owner](scanner/screenshots/tweet6_owner_eoa_sleeping.png)
+
+`withdraw()` disassembly (owner check in storage slot 1):
+
+![Disassembly](scanner/screenshots/tweet5_disassembly_withdraw.png)
+
 ## Ethics
 
 All funds in this contract belong to their original depositors. This
