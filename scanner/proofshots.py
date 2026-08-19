@@ -24,6 +24,7 @@ PAGES = [
     ("tweet5_contract_2015_122eth", "https://eth.blockscout.com/address/0xc4c51de1abf5d60dbd329ec0f999fd8f021ae9fc"),
     ("tweet6_owner_eoa_sleeping", "https://eth.blockscout.com/address/0x87c5b5874a18b4306df8a752a6c8cc3e82dafc19"),
     ("tweet10_next_2480eth", "https://eth.blockscout.com/address/0x4d55f76ce2dbbae7b48661bef9bd144ce0c9091b"),
+    ("tweet_ico2017_55eth", "https://eth.blockscout.com/address/0x2387a684f010936ce7267b0110c980c867533ff6"),
 ]
 
 
